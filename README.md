@@ -8,7 +8,7 @@ Steps:
 
 3.- The app was made with react which shows this interaction with the oracle factory.
 
-4.- Below is the link of the app example:
+4.- Below is the link of the app example: https://get-floor-price-ui.vercel.app/
 
 # Getting Started with Create React App
 
