@@ -1,4 +1,4 @@
-### The App steps
+# Oracle Factory App steps
 A simple app was made taking data from an oracle factory created from an Opensea api to take a floor price from a specific collection and display this data.
 
 Steps:
