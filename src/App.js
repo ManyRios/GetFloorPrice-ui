@@ -32,10 +32,11 @@ const App = () => {
     const contract = new ethers.Contract(contractAddr, abi, signer);
 
     try {
+      const oracle = await contract.getOracleData()
       const data = await contract.getFloorPrice();
       const ch = ethers.utils.formatEther(data);
       setPrice(ch);
-      console.log("data: ", ch);
+      console.log("data: ", ch, oracle);
     } catch (err) {
       console.log("Error: ", err);
     }
