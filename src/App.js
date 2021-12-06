@@ -27,15 +27,14 @@ const App = () => {
   }, [setWriteProvider]);
   //get the data that came from the oracle factory and it configured API 
   async function getOracle() {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract(contractAddr, abi, signer);
-
+    const contract =  loadContract(abi, contractAddr)    
+    const oracle = await contract.getOracleData()
+   
     try {
-      const oracle = await contract.getOracleData()
-      console.log("dataOracle")
+      
       if(oracle){
-        const data = await contract.getFloorPrice();
+        const newContract = loadContract(abi, contractAddr)
+        const data = await newContract.getFloorPrice();
         const ch = ethers.utils.formatEther(data);
         setPrice(ch);
         console.log("data: ", ch);
@@ -122,6 +121,12 @@ const App = () => {
   );
 };
 
+async function loadContract(abi, contractAddr){
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(contractAddr, abi, signer);
+    return contract
+}
 const web3Modal = new Web3Modal({
   // Modal to connect wallets
   cacheProvider: true, // optional
