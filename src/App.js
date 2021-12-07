@@ -3,8 +3,15 @@ import Web3Modal from "web3modal";
 import { Web3Provider } from "@ethersproject/providers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers } from "ethers";
-import { Container, Card, Button, Col, Row } from "react-bootstrap";
-
+import { 
+    Container, 
+    Card, 
+    Button, 
+    Col, 
+    Row, 
+    ListGroup, 
+    ListGroupItem } 
+    from "react-bootstrap";
 
 import { NavbarMenu, Account } from "./components";
 
@@ -14,6 +21,7 @@ const App = () => {
   const [provider, setProvider] = useState();
   const [price, setPrice] = useState();
   const [address, setAddress] = useState();
+  const [updating, setUpdating] = useState(false);
   //Abi and address from the deployed contract witch interacts with the iexec oracle factory
   const abi = require("./contracts/GetFloorPrice.abi");
   const contractAddr = require("./contracts/GetFloorPrice.address");
@@ -29,9 +37,15 @@ const App = () => {
   //get the data that came from the oracle factory and it configured API
 
   async function handleUpdate() {
+    setUpdating(true);
     const contract = await loadContract(abi, contractAddr);
     const oracle = await contract.getOracleData();
-    console.log("oracleData", oracle);
+    console.log("oracleData", oracle.hash);
+    const txHash = "Transaction succesful. txHash: " + oracle.hash;
+    alert(txHash);
+    setTimeout(() => {
+      setUpdating(false);
+    }, 3000);
   }
 
   async function getOracle() {
@@ -96,24 +110,36 @@ const App = () => {
                       traits of faces, hair, hats, body and backgrounds. Each
                       Doodle is a unique, non-fungible token (NFT) on the
                       Ethereum blockchain.
-                     
-                        <span>1.- Update the floor price for this collection</span>
-                        <span>2.- Click on the show price button</span>
-                     
+                      <br />
                     </Card.Text>
+                    <ListGroup className="list-group-flush mb-2">
+                      <ListGroupItem>1.- Update the floor price for this collection</ListGroupItem>
+                      <ListGroupItem>2.- Click on the show price button</ListGroupItem>
+                      
+                    </ListGroup>
                     <Card.Text>
                       The floor price for our collection is: $
                       <span style={{ color: "red" }}>{price}</span>
                     </Card.Text>
                     <Row>
                       <Col md={6}>
-                        <Button onClick={handleUpdate} className="mb-3">Update Price</Button>
+                        <Button
+                          onClick={handleUpdate}
+                          className="mb-3"
+                          disabled={updating ? true : false}
+                        >
+                          {updating ? "Updating..." : "Update Price"}
+                        </Button>
                       </Col>
                       <Col md={6}>
-                        <Button variant="primary" onClick={getOracle}>
+                        <Button
+                          variant="primary"
+                          onClick={getOracle}
+                          disabled={updating ? true : false}
+                        >
                           Show price
                         </Button>
-                        </Col>
+                      </Col>
                     </Row>
                   </div>
                 )}
