@@ -3,14 +3,15 @@ import Web3Modal from "web3modal";
 import { Web3Provider } from "@ethersproject/providers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers } from "ethers";
-import { Container, Card, Button, Col } from "react-bootstrap";
+import { Container, Card, Button, Col, Row } from "react-bootstrap";
+
+
 import { NavbarMenu, Account } from "./components";
 
 const App = () => {
-
   //We set the states for the app
   const [network, setNetwork] = useState();
-  const [provider, setWriteProvider] = useState();
+  const [provider, setProvider] = useState();
   const [price, setPrice] = useState();
   const [address, setAddress] = useState();
   //Abi and address from the deployed contract witch interacts with the iexec oracle factory
@@ -21,25 +22,25 @@ const App = () => {
   const loadWeb3Modal = useCallback(async () => {
     const provider = await web3Modal.connect();
     // Wrapper for transforming a web3 provider (like metamask)
-    setWriteProvider(new Web3Provider(provider));
+    setProvider(new Web3Provider(provider));
     setAddress(provider.selectedAddress);
     setNetwork(provider.networkVersion);
-  }, [setWriteProvider]);
-  //get the data that came from the oracle factory and it configured API 
+  }, [setProvider]);
+  //get the data that came from the oracle factory and it configured API
+
+  async function handleUpdate() {
+    const contract = await loadContract(abi, contractAddr);
+    const oracle = await contract.getOracleData();
+    console.log("oracleData", oracle);
+  }
+
   async function getOracle() {
-    const contract =  await loadContract(abi, contractAddr)    
-    const oracle = await contract.getOracleData()
-    console.log("oracleData")
     try {
-      
-      if(oracle){
-        const newContract = loadContract(abi, contractAddr)
-        const data = await newContract.getFloorPrice();
-        const ch = ethers.utils.formatEther(data);
-        setPrice(ch);
-        console.log("data: ", ch);
-      }
-     
+      const newContract = loadContract(abi, contractAddr);
+      const data = await newContract.getFloorPrice();
+      const ch = ethers.utils.formatEther(data);
+      setPrice(ch);
+      console.log("data: ", ch);
     } catch (err) {
       console.log("Error: ", err);
     }
@@ -95,21 +96,25 @@ const App = () => {
                       traits of faces, hair, hats, body and backgrounds. Each
                       Doodle is a unique, non-fungible token (NFT) on the
                       Ethereum blockchain.
+                     
+                        <span>1.- Update the floor price for this collection</span>
+                        <span>2.- Click on the show price button</span>
+                     
                     </Card.Text>
                     <Card.Text>
                       The floor price for our collection is: $
                       <span style={{ color: "red" }}>{price}</span>
                     </Card.Text>
-
-                    {price ? (
-                      <Button href="https://opensea.io/collection/doodles-official">
-                        Visit our market
-                      </Button>
-                    ) : (
-                      <Button variant="primary" onClick={getOracle}>
-                        Get Floor price
-                      </Button>
-                    )}
+                    <Row>
+                      <Col md={6}>
+                        <Button onClick={handleUpdate} className="mb-3">Update Price</Button>
+                      </Col>
+                      <Col md={6}>
+                        <Button variant="primary" onClick={getOracle}>
+                          Show price
+                        </Button>
+                        </Col>
+                    </Row>
                   </div>
                 )}
               </Card.Body>
@@ -120,13 +125,6 @@ const App = () => {
     </div>
   );
 };
-
-function loadContract(abi, contractAddr){
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract(contractAddr, abi, signer);
-    return contract
-}
 
 const web3Modal = new Web3Modal({
   // Modal to connect wallets
@@ -147,6 +145,13 @@ const logoutOfWeb3Modal = async () => {
     window.location.reload();
   }, 1);
 };
+//Contract loader
+function loadContract(abi, contractAddr) {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const contract = new ethers.Contract(contractAddr, abi, signer);
+  return contract;
+}
 
 window.ethereum &&
   window.ethereum.on("chainChanged", (chainId) => {
